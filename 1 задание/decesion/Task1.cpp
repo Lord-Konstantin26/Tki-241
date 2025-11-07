@@ -1,5 +1,4 @@
 ﻿#include "Task1.h"
-#include <cmath>
 
 namespace miit::algebra
 {
@@ -19,7 +18,7 @@ namespace miit::algebra
         return last_negative;
     }
 
-    void Task1Exercise::Task1()
+    void Task1Exercise::Task()
     {
         const auto& data = matrix->get_data();
         int last_negative_index = find_last_negative_index();
@@ -29,5 +28,14 @@ namespace miit::algebra
             // Модифицируем матрицу
             (*matrix)[last_negative_index] = std::abs(data[0]);
         }
+    }
+
+    /**
+    * @brief Возвращает результат задания 1
+    * @return уникальный указатель на результирующую матрицу
+    */
+    std::unique_ptr<Matrix> Task1Exercise::get_result() const
+    {
+        return std::make_unique<Matrix>(*matrix);
     }
 }

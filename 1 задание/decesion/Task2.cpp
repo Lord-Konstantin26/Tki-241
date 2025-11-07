@@ -1,7 +1,6 @@
 ﻿#include "Task2.h"
 #include <vector>
 #include <cmath>
-#include <array>
 
 namespace miit::algebra
 {
@@ -31,36 +30,24 @@ namespace miit::algebra
         return false;
     }
 
-    size_t Task2Exercise::count_elements_without_repeats() const
+    void Task2Exercise::Task()
     {
         const auto& data = matrix->get_data();
-        size_t count = 0;
+        std::vector<int> result_data;
 
         for (int value : data)
         {
             if (!has_repeating_digits(value))
             {
-                count++;
+                result_data.push_back(value);
             }
         }
 
-        return count;
+        result = std::make_unique<Matrix>(result_data);
     }
 
-    std::unique_ptr<Matrix> Task2Exercise::Task2()
+    std::unique_ptr<Matrix> Task2Exercise::get_result() const
     {
-        const auto& data = matrix->get_data();
-        std::vector<int> result;
-        result.reserve(count_elements_without_repeats());
-
-        for (int value : data)
-        {
-            if (!has_repeating_digits(value))
-            {
-                result.push_back(value);
-            }
-        }
-
-        return std::make_unique<Matrix>(result);
+        return std::make_unique<Matrix>(*result);
     }
 }

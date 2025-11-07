@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Exercise.h"
+#include <array>
 
 namespace miit::algebra
 {
@@ -9,7 +10,14 @@ namespace miit::algebra
     class Task2Exercise : public Exercise
     {
     public:
-        using Exercise::Exercise;
+        /**
+        * @brief Конструктор - явный вызов конструктора базового класса
+        * @param matrix матрица для обработки
+        * @param generator генератор значений
+        */
+        explicit Task2Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator)
+            : Exercise(std::move(matrix), std::move(generator)) {
+        }
 
         /**
         * @brief Проверяет есть ли в числе повторяющиеся цифры
@@ -19,18 +27,17 @@ namespace miit::algebra
         static bool has_repeating_digits(int number);
 
         /**
-        * @brief Подсчитывает количество элементов без повторяющихся цифр
-        * @return количество элементов без повторяющихся цифр
+        * @brief Выполняет задание 2
         */
-        size_t count_elements_without_repeats() const;
+        void Task() override;
 
         /**
-        * @brief Создает новую матрицу без элементов с повторяющимися цифрами
-        * @return новая матрица
+        * @brief Возвращает результат задания 2
+        * @return уникальный указатель на результирующую матрицу
         */
-        std::unique_ptr<Matrix> Task2() override;
+        std::unique_ptr<Matrix> get_result() const;
 
-        void Task1() override {}
-        std::unique_ptr<Matrix> Task3() override { return nullptr; }
+    private:
+        std::unique_ptr<Matrix> result;
     };
 }

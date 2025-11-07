@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Exercise.h"
+#include <cmath>
 
 namespace miit::algebra
 {
@@ -9,7 +10,14 @@ namespace miit::algebra
     class Task1Exercise : public Exercise
     {
     public:
-        using Exercise::Exercise;
+        /**
+        * @brief Конструктор - явный вызов конструктора базового класса
+        * @param matrix матрица для обработки
+        * @param generator генератор значений
+        */
+        explicit Task1Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator)
+            : Exercise(std::move(matrix), std::move(generator)) {
+        }
 
         /**
         * @brief Находит индекс последнего отрицательного элемента
@@ -18,11 +26,14 @@ namespace miit::algebra
         int find_last_negative_index() const;
 
         /**
-        * @brief Замена последнего отрицательного элемента на модуль первого элемента
+        * @brief Выполняет задание 1
         */
-        void Task1() override;
+        void Task() override;
 
-        std::unique_ptr<Matrix> Task2() override { return nullptr; }
-        std::unique_ptr<Matrix> Task3() override { return nullptr; }
+        /**
+        * @brief Возвращает результат задания 1
+        * @return уникальный указатель на результирующую матрицу
+        */
+        std::unique_ptr<Matrix> get_result() const;
     };
 }

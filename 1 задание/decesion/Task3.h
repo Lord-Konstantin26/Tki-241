@@ -9,15 +9,27 @@ namespace miit::algebra
     class Task3Exercise : public Exercise
     {
     public:
-        using Exercise::Exercise;
+        /**
+        * @brief Конструктор - явный вызов конструктора базового класса
+        * @param matrix матрица для обработки
+        * @param generator генератор значений
+        */
+        explicit Task3Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator)
+            : Exercise(std::move(matrix), std::move(generator)) {
+        }
 
         /**
-        * @brief Создает новую матрицу: M[i] = i*P[i] для четных индексов, M[i] = -P[i] для нечетных
-        * @return новая матрица
+        * @brief Выполняет задание 3
         */
-        std::unique_ptr<Matrix> Task3() override;
+        void Task() override;
 
-        void Task1() override {}
-        std::unique_ptr<Matrix> Task2() override { return nullptr; }
+        /**
+        * @brief Возвращает результат задания 3
+        * @return уникальный указатель на результирующую матрицу
+        */
+        std::unique_ptr<Matrix> get_result() const;
+
+    private:
+        std::unique_ptr<Matrix> result;
     };
 }

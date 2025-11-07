@@ -3,10 +3,10 @@
 #include "../decesion/Exercise.h"
 #include "../decesion/IStreamGenerator.h"
 #include "../decesion/RandomGenerator.h"
+#include "../decesion/ConstantGenerator.h"
 #include "../decesion/Task1.h"
 #include "../decesion/Task2.h"
 #include "../decesion/Task3.h"
-
 
 using namespace miit::algebra;
 
@@ -48,7 +48,13 @@ FillMethod choose_fill_method() {
         choice = input_int("Ваш выбор (1 или 2): ");
     } while (choice != 1 && choice != 2);
 
-    return (choice == 1) ? FillMethod::RANDOM : FillMethod::KEYBOARD;
+    // Убрана строка с тернарным оператором
+    if (choice == 1) {
+        return FillMethod::RANDOM;
+    }
+    else {
+        return FillMethod::KEYBOARD;
+    }
 }
 
 int main() {
@@ -56,7 +62,6 @@ int main() {
     try {
         std::cout << "=== Демонстрация работы с матрицей ===\n";
 
-        // Ввод размера массива
         int size = input_int("Введите размер массива: ");
         if (size <= 0) {
             std::cout << "Размер массива должен быть положительным!\n";
@@ -67,10 +72,11 @@ int main() {
         auto matrix = std::make_unique<Matrix>(static_cast<size_t>(size));
         std::unique_ptr<Generator> generator;
 
-        // Выбор способа заполнения
+        // Выбор способа заполнения с использованием switch case
         FillMethod method = choose_fill_method();
 
-        if (method == FillMethod::RANDOM) {
+        switch (method) {
+        case FillMethod::RANDOM: {
             int min_val = input_int("Введите минимальное значение: ");
             int max_val = input_int("Введите максимальное значение: ");
 
@@ -80,10 +86,17 @@ int main() {
             }
 
             generator = std::make_unique<RandomGenerator>(min_val, max_val);
+            break;
         }
-        else {
+        case FillMethod::KEYBOARD: {
             std::cout << "Введите " << size << " целых чисел:\n";
             generator = std::make_unique<IStreamGenerator>();
+            break;
+        }
+        default: {
+            std::cout << "Неизвестный метод заполнения!\n";
+            return 1;
+        }
         }
 
         // Заполнение матрицы
@@ -94,58 +107,70 @@ int main() {
 
         // Задание 1
         std::cout << "\n=== Задание 1: Замена последнего отрицательного элемента ===\n";
+        auto task1_matrix = std::make_unique<Matrix>(*matrix);
         auto task1 = std::make_unique<Task1Exercise>(
-            std::make_unique<Matrix>(*matrix),
-            std::make_unique<RandomGenerator>(0, 0) // заглушка
+            std::move(task1_matrix),
+            std::make_unique<ConstantGenerator>(0)
         );
-
-        std::cout << "До: " << task1->get_matrix_string() << std::endl;
-        task1->Task1();
-        std::cout << "После: " << task1->get_matrix_string() << std::endl;
+        std::cout << "До: " << matrix->to_string() << std::endl;
+        task1->Task();
+        auto result1 = task1->get_result();
+        std::cout << "После: " << result1->to_string() << std::endl;
 
         // Задание 2
         std::cout << "\n=== Задание 2: Удаление элементов с повторяющимися цифрами ===\n";
+        auto task2_matrix = std::make_unique<Matrix>(*matrix);
         auto task2 = std::make_unique<Task2Exercise>(
-            std::make_unique<Matrix>(*matrix),
-            std::make_unique<RandomGenerator>(0, 0) // заглушка
+            std::move(task2_matrix),
+            std::make_unique<ConstantGenerator>(0)
         );
-
-        auto result2 = task2->Task2();
-        std::cout << "Результат: " << result2->to_string() << std::endl;
+        std::cout << "До: " << matrix->to_string() << std::endl;
+        task2->Task();
+        auto result2 = task2->get_result();
+        std::cout << "После: " << result2->to_string() << std::endl;
 
         // Задание 3
         std::cout << "\n=== Задание 3: Преобразование массива ===\n";
+        auto task3_matrix = std::make_unique<Matrix>(*matrix);
         auto task3 = std::make_unique<Task3Exercise>(
-            std::make_unique<Matrix>(*matrix),
-            std::make_unique<RandomGenerator>(0, 0) // заглушка
+            std::move(task3_matrix),
+            std::make_unique<ConstantGenerator>(0)
         );
-
-        auto result3 = task3->Task3();
-        std::cout << "Результат: " << result3->to_string() << std::endl;
+        std::cout << "До: " << matrix->to_string() << std::endl;
+        task3->Task();
+        auto result3 = task3->get_result();
+        std::cout << "После: " << result3->to_string() << std::endl;
 
         // Демонстрация операторов
         std::cout << "\n=== Демонстрация операторов ===\n";
+        auto matrix_ops = std::make_unique<Matrix>(*matrix);
 
-        // Оператор []
-        std::cout << "matrix[0] = " << (*matrix)[0] << std::endl;
+        if (matrix_ops->size() > 0) {
+            std::cout << "matrix[0] = " << (*matrix_ops)[0] << std::endl;
+        }
 
-        // Оператор << (добавление в начало)
-        *matrix << 999;
-        std::cout << "После matrix << 999: " << matrix->to_string() << std::endl;
+        *matrix_ops << 999;
+        std::cout << "После matrix << 999: " << matrix_ops->to_string() << std::endl;
 
-        // Оператор >> (извлечение из начала)
         int extracted;
-        *matrix >> extracted;
+        *matrix_ops >> extracted;
         std::cout << "Извлеченный элемент: " << extracted << std::endl;
-        std::cout << "После извлечения: " << matrix->to_string() << std::endl;
+        std::cout << "После извлечения: " << matrix_ops->to_string() << std::endl;
 
-        // Оператор * (указатель на данные)
-        const int* data_ptr = **matrix;
-        std::cout << "Первый элемент через указатель: " << *data_ptr << std::endl;
+        if (matrix_ops->size() > 0) {
+            const int* data_ptr = **matrix_ops;
+            std::cout << "Первый элемент через указатель: " << *data_ptr << std::endl;
+        }
+
+        std::cout << "\n=== Программа завершена успешно ===\n";
 
     }
     catch (const std::exception& e) {
         std::cerr << "Ошибка: " << e.what() << std::endl;
+        return 1;
+    }
+    catch (...) {
+        std::cerr << "Неизвестная ошибка!" << std::endl;
         return 1;
     }
 
