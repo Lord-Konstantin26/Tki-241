@@ -11,75 +11,85 @@
 
 namespace miit::algebra
 {
-    // Функция для безопасного ввода целых чисел
+    enum class TaskChoice {
+        EXIT = 0,
+        TASK1 = 1,
+        TASK2 = 2,
+        TASK3 = 3
+    };
+
+    enum class FillMethod {
+        RANDOM = 1,
+        KEYBOARD = 2
+    };
+
+    const int MIN_SIZE = 1;
+    const int MAX_SIZE = 100;
+    const int MIN_RANDOM = -100;
+    const int MAX_RANDOM = 100;
+
+
     int input_int(const std::string& prompt)
     {
         int value;
-        while (true)
+        std::cout << prompt;
+        if (std::cin >> value)
         {
-            std::cout << prompt;
-            if (std::cin >> value)
-            {
-                break;
-            }
-            else
-            {
-                std::cout << "Ошибка ввода! Пожалуйста, введите целое число.\n";
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
+            return value;
         }
-        return value;
+        else
+        {
+            std::cout << "Ошибка ввода! Программа завершена.\n";
+            std::exit(1);
+        }
     }
 
     // Функция для выбора метода заполнения
-    int choose_fill_method()
+    FillMethod choose_fill_method()
     {
         std::cout << "\n=== Выбор метода заполнения матрицы ===\n";
-        std::cout << "1 - Заполнить случайными числами\n";
-        std::cout << "2 - Ввести значения с клавиатуры\n";
+        std::cout << static_cast<int>(FillMethod::RANDOM) << " - Заполнить случайными числами\n";
+        std::cout << static_cast<int>(FillMethod::KEYBOARD) << " - Ввести значения с клавиатуры\n";
 
-        int choice;
-        do
+        int choice = input_int("Ваш выбор (1 или 2): ");
+
+        switch (choice)
         {
-            choice = input_int("Ваш выбор (1 или 2): ");
-            switch (choice)
-            {
-            case 1:
-            case 2:
-                return choice;
-            default:
-                std::cout << "Неверный выбор! Пожалуйста, введите 1 или 2.\n";
-                break;
-            }
-        } while (true);
+        case static_cast<int>(FillMethod::RANDOM):
+            return FillMethod::RANDOM;
+        case static_cast<int>(FillMethod::KEYBOARD):
+            return FillMethod::KEYBOARD;
+        default:
+            std::cout << "Неверный выбор! Программа завершена.\n";
+            std::exit(1);
+        }
     }
 
     // Функция для выбора задания
-    int choose_task()
+    TaskChoice choose_task()
     {
         std::cout << "\n=== Выбор задания ===\n";
-        std::cout << "1 - Задание 1 (замена последнего отрицательного)\n";
-        std::cout << "2 - Задание 2 (удаление с повторяющимися цифрами)\n";
-        std::cout << "3 - Задание 3 (преобразование по правилу)\n";
-        std::cout << "0 - Выход\n";
+        std::cout << static_cast<int>(TaskChoice::TASK1) << " - Задание 1 (замена последнего отрицательного)\n";
+        std::cout << static_cast<int>(TaskChoice::TASK2) << " - Задание 2 (удаление с повторяющимися цифрами)\n";
+        std::cout << static_cast<int>(TaskChoice::TASK3) << " - Задание 3 (преобразование по правилу)\n";
+        std::cout << static_cast<int>(TaskChoice::EXIT) << " - Выход\n";
 
-        int choice;
-        do
+        int choice = input_int("Ваш выбор (0-3): ");
+
+        switch (choice)
         {
-            choice = input_int("Ваш выбор (0-3): ");
-            switch (choice)
-            {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                return choice;
-            default:
-                std::cout << "Неверный выбор! Пожалуйста, введите число от 0 до 3.\n";
-                break;
-            }
-        } while (true);
+        case static_cast<int>(TaskChoice::EXIT):
+            return TaskChoice::EXIT;
+        case static_cast<int>(TaskChoice::TASK1):
+            return TaskChoice::TASK1;
+        case static_cast<int>(TaskChoice::TASK2):
+            return TaskChoice::TASK2;
+        case static_cast<int>(TaskChoice::TASK3):
+            return TaskChoice::TASK3;
+        default:
+            std::cout << "Неверный выбор! Программа завершена.\n";
+            std::exit(1);
+        }
     }
 
     // Основная функция приложения
@@ -89,39 +99,35 @@ namespace miit::algebra
 
         while (true)
         {
-            int task_choice = choose_task();
+            TaskChoice task_choice = choose_task();
 
-            if (task_choice == 0)
+            if (task_choice == TaskChoice::EXIT)
             {
                 std::cout << "Выход из программы.\n";
                 break;
             }
 
             // Ввод размера матрицы
-            int size;
-            do
+            int size = input_int("Введите размер матрицы (1-100): ");
+            if (size < MIN_SIZE || size > MAX_SIZE)
             {
-                size = input_int("Введите размер матрицы (1-100): ");
-                if (size >= 1 && size <= 100)
-                {
-                    break;
-                }
-                std::cout << "Неверный размер! Пожалуйста, введите число от 1 до 100.\n";
-            } while (true);
+                std::cout << "Неверный размер! Программа завершена.\n";
+                std::exit(1);
+            }
 
             // Создание матрицы
             auto matrix = std::make_unique<Matrix>(static_cast<size_t>(size));
             std::unique_ptr<Generator> generator;
 
             // Выбор метода заполнения
-            int fill_method = choose_fill_method();
+            FillMethod fill_method = choose_fill_method();
 
             switch (fill_method)
             {
-            case 1:
-                generator = std::make_unique<RandomGenerator>(-100, 100);
+            case FillMethod::RANDOM:
+                generator = std::make_unique<RandomGenerator>(MIN_RANDOM, MAX_RANDOM);
                 break;
-            case 2:
+            case FillMethod::KEYBOARD:
                 std::cout << "Введите " << size << " элементов матрицы:\n";
                 generator = std::make_unique<IStreamGenerator>();
                 break;
@@ -136,27 +142,29 @@ namespace miit::algebra
 
             switch (task_choice)
             {
-            case 1:
+            case TaskChoice::TASK1:
             {
                 auto task1 = std::make_unique<Task1Exercise>(std::move(matrix), nullptr);
                 task1->Task();
                 result = task1->get_result();
                 break;
             }
-            case 2:
+            case TaskChoice::TASK2:
             {
                 auto task2 = std::make_unique<Task2Exercise>(std::move(matrix), nullptr);
                 task2->Task();
                 result = task2->get_result();
                 break;
             }
-            case 3:
+            case TaskChoice::TASK3:
             {
                 auto task3 = std::make_unique<Task3Exercise>(std::move(matrix), nullptr);
                 task3->Task();
                 result = task3->get_result();
                 break;
             }
+            default:
+                break;
             }
 
             if (result)
