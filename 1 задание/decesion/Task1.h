@@ -15,15 +15,7 @@ namespace miit::algebra
         * @param matrix матрица для обработки
         * @param generator генератор значений
         */
-        explicit Task1Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator)
-            : Exercise(std::move(matrix), std::move(generator)) {
-        }
-
-        /**
-        * @brief Находит индекс последнего отрицательного элемента
-        * @return индекс последнего отрицательного элемента или -1 если нет
-        */
-        int find_last_negative_index() const;
+        explicit Task1Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator);
 
         /**
         * @brief Выполняет задание 1
@@ -35,5 +27,12 @@ namespace miit::algebra
         * @return уникальный указатель на результирующую матрицу
         */
         std::unique_ptr<Matrix> get_result() const;
+
+    private:
+        /**
+        * @brief Находит индекс последнего отрицательного элемента
+        * @return индекс последнего отрицательного элемента или -1 если нет
+        */
+        int find_last_negative_index() const;
     };
 }

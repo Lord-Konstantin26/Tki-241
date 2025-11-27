@@ -2,6 +2,11 @@
 
 namespace miit::algebra
 {
+    Task1Exercise::Task1Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator)
+        : Exercise(std::move(matrix), std::move(generator))
+    {
+    }
+
     int Task1Exercise::find_last_negative_index() const
     {
         const auto& data = matrix->get_data();
@@ -30,10 +35,6 @@ namespace miit::algebra
         }
     }
 
-    /**
-    * @brief Возвращает результат задания 1
-    * @return уникальный указатель на результирующую матрицу
-    */
     std::unique_ptr<Matrix> Task1Exercise::get_result() const
     {
         return std::make_unique<Matrix>(*matrix);

@@ -1,53 +1,42 @@
-﻿#include "Task2.h"
-#include <vector>
-#include <cmath>
+﻿#include "Task1.h"
 
 namespace miit::algebra
 {
-    bool Task2Exercise::has_repeating_digits(int number)
+    Task1Exercise::Task1Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator)
+        : Exercise(std::move(matrix), std::move(generator))
     {
-        std::array<int, 10> count = { 0 };
-        int num = std::abs(number);
-
-        // Обработка нуля
-        if (num == 0)
-        {
-            count[0]++;
-            return count[0] > 1;
-        }
-
-        while (num > 0)
-        {
-            int digit = num % 10;
-            count[digit]++;
-            if (count[digit] > 1)
-            {
-                return true;
-            }
-            num /= 10;
-        }
-
-        return false;
     }
 
-    void Task2Exercise::Task()
+    int Task1Exercise::find_last_negative_index() const
     {
         const auto& data = matrix->get_data();
-        std::vector<int> result_data;
+        int last_negative = -1;
 
-        for (int value : data)
+        for (size_t i = 0; i < data.size(); i++)
         {
-            if (!has_repeating_digits(value))
+            if (data[i] < 0)
             {
-                result_data.push_back(value);
+                last_negative = static_cast<int>(i);
             }
         }
 
-        result = std::make_unique<Matrix>(result_data);
+        return last_negative;
     }
 
-    std::unique_ptr<Matrix> Task2Exercise::get_result() const
+    void Task1Exercise::Task()
     {
-        return std::make_unique<Matrix>(*result);
+        const auto& data = matrix->get_data();
+        int last_negative_index = find_last_negative_index();
+
+        if (last_negative_index != -1 && !data.empty())
+        {
+            // Модифицируем матрицу
+            (*matrix)[last_negative_index] = std::abs(data[0]);
+        }
+    }
+
+    std::unique_ptr<Matrix> Task1Exercise::get_result() const
+    {
+        return std::make_unique<Matrix>(*matrix);
     }
 }

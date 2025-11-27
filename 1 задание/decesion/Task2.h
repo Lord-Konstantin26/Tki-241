@@ -15,16 +15,7 @@ namespace miit::algebra
         * @param matrix матрица для обработки
         * @param generator генератор значений
         */
-        explicit Task2Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator)
-            : Exercise(std::move(matrix), std::move(generator)) {
-        }
-
-        /**
-        * @brief Проверяет есть ли в числе повторяющиеся цифры
-        * @param number число для проверки
-        * @return true если есть повторяющиеся цифры, иначе false
-        */
-        static bool has_repeating_digits(int number);
+        explicit Task2Exercise(std::unique_ptr<Matrix> matrix, std::unique_ptr<Generator> generator);
 
         /**
         * @brief Выполняет задание 2
@@ -38,6 +29,13 @@ namespace miit::algebra
         std::unique_ptr<Matrix> get_result() const;
 
     private:
+        /**
+        * @brief Проверяет есть ли в числе повторяющиеся цифры
+        * @param number число для проверки
+        * @return true если есть повторяющиеся цифры, иначе false
+        */
+        static bool has_repeating_digits(int number);
+
         std::unique_ptr<Matrix> result;
     };
 }

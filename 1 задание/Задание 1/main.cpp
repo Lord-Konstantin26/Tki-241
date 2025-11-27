@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <memory>
+#include <limits>
 #include "../decesion/Exercise.h"
 #include "../decesion/IStreamGenerator.h"
 #include "../decesion/RandomGenerator.h"
@@ -8,171 +9,168 @@
 #include "../decesion/Task2.h"
 #include "../decesion/Task3.h"
 
-using namespace miit::algebra;
-
-/**
-* @brief Перечисление для выбора способа заполнения массива
-*/
-enum class FillMethod {
-    RANDOM,
-    KEYBOARD
-};
-
-/**
-* @brief Функция для безопасного ввода целого числа
-* @param prompt сообщение для пользователя
-* @return введенное число
-*/
-int input_int(const std::string& prompt) {
-    std::cout << prompt;
-    int value;
-    while (!(std::cin >> value)) {
-        std::cout << "Ошибка ввода! Пожалуйста, введите целое число: ";
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-    return value;
-}
-
-/**
-* @brief Функция для выбора способа заполнения
-* @return выбранный способ заполнения
-*/
-FillMethod choose_fill_method() {
-    std::cout << "\nВыберите способ заполнения массива:\n";
-    std::cout << "1 - Случайные числа\n";
-    std::cout << "2 - Ввод с клавиатуры\n";
-
-    int choice;
-    do {
-        choice = input_int("Ваш выбор (1 или 2): ");
-    } while (choice != 1 && choice != 2);
-
-    // Убрана строка с тернарным оператором
-    if (choice == 1) {
-        return FillMethod::RANDOM;
-    }
-    else {
-        return FillMethod::KEYBOARD;
-    }
-}
-
-int main() {
-    setlocale(LC_ALL, "RUSSIAN");
-    try {
-        std::cout << "=== Демонстрация работы с матрицей ===\n";
-
-        int size = input_int("Введите размер массива: ");
-        if (size <= 0) {
-            std::cout << "Размер массива должен быть положительным!\n";
-            return 1;
+namespace miit::algebra
+{
+    // Функция для безопасного ввода целых чисел
+    int input_int(const std::string& prompt)
+    {
+        int value;
+        while (true)
+        {
+            std::cout << prompt;
+            if (std::cin >> value)
+            {
+                break;
+            }
+            else
+            {
+                std::cout << "Ошибка ввода! Пожалуйста, введите целое число.\n";
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
         }
+        return value;
+    }
 
-        // Создание матрицы
-        auto matrix = std::make_unique<Matrix>(static_cast<size_t>(size));
-        std::unique_ptr<Generator> generator;
+    // Функция для выбора метода заполнения
+    int choose_fill_method()
+    {
+        std::cout << "\n=== Выбор метода заполнения матрицы ===\n";
+        std::cout << "1 - Заполнить случайными числами\n";
+        std::cout << "2 - Ввести значения с клавиатуры\n";
 
-        // Выбор способа заполнения с использованием switch case
-        FillMethod method = choose_fill_method();
+        int choice;
+        do
+        {
+            choice = input_int("Ваш выбор (1 или 2): ");
+            switch (choice)
+            {
+            case 1:
+            case 2:
+                return choice;
+            default:
+                std::cout << "Неверный выбор! Пожалуйста, введите 1 или 2.\n";
+                break;
+            }
+        } while (true);
+    }
 
-        switch (method) {
-        case FillMethod::RANDOM: {
-            int min_val = input_int("Введите минимальное значение: ");
-            int max_val = input_int("Введите максимальное значение: ");
+    // Функция для выбора задания
+    int choose_task()
+    {
+        std::cout << "\n=== Выбор задания ===\n";
+        std::cout << "1 - Задание 1 (замена последнего отрицательного)\n";
+        std::cout << "2 - Задание 2 (удаление с повторяющимися цифрами)\n";
+        std::cout << "3 - Задание 3 (преобразование по правилу)\n";
+        std::cout << "0 - Выход\n";
 
-            if (min_val > max_val) {
-                std::cout << "Минимальное значение не может быть больше максимального!\n";
-                return 1;
+        int choice;
+        do
+        {
+            choice = input_int("Ваш выбор (0-3): ");
+            switch (choice)
+            {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+                return choice;
+            default:
+                std::cout << "Неверный выбор! Пожалуйста, введите число от 0 до 3.\n";
+                break;
+            }
+        } while (true);
+    }
+
+    // Основная функция приложения
+    void run_application()
+    {
+        std::cout << "=== Система выполнения заданий над матрицами ===\n";
+
+        while (true)
+        {
+            int task_choice = choose_task();
+
+            if (task_choice == 0)
+            {
+                std::cout << "Выход из программы.\n";
+                break;
             }
 
-            generator = std::make_unique<RandomGenerator>(min_val, max_val);
-            break;
+            // Ввод размера матрицы
+            int size;
+            do
+            {
+                size = input_int("Введите размер матрицы (1-100): ");
+                if (size >= 1 && size <= 100)
+                {
+                    break;
+                }
+                std::cout << "Неверный размер! Пожалуйста, введите число от 1 до 100.\n";
+            } while (true);
+
+            // Создание матрицы
+            auto matrix = std::make_unique<Matrix>(static_cast<size_t>(size));
+            std::unique_ptr<Generator> generator;
+
+            // Выбор метода заполнения
+            int fill_method = choose_fill_method();
+
+            switch (fill_method)
+            {
+            case 1:
+                generator = std::make_unique<RandomGenerator>(-100, 100);
+                break;
+            case 2:
+                std::cout << "Введите " << size << " элементов матрицы:\n";
+                generator = std::make_unique<IStreamGenerator>();
+                break;
+            }
+
+            // Заполнение матрицы
+            matrix->fill(std::move(generator));
+            std::cout << "Исходная матрица: " << matrix->to_string() << "\n";
+
+            // Выполнение выбранного задания
+            std::unique_ptr<Matrix> result;
+
+            switch (task_choice)
+            {
+            case 1:
+            {
+                auto task1 = std::make_unique<Task1Exercise>(std::move(matrix), nullptr);
+                task1->Task();
+                result = task1->get_result();
+                break;
+            }
+            case 2:
+            {
+                auto task2 = std::make_unique<Task2Exercise>(std::move(matrix), nullptr);
+                task2->Task();
+                result = task2->get_result();
+                break;
+            }
+            case 3:
+            {
+                auto task3 = std::make_unique<Task3Exercise>(std::move(matrix), nullptr);
+                task3->Task();
+                result = task3->get_result();
+                break;
+            }
+            }
+
+            if (result)
+            {
+                std::cout << "Результат: " << result->to_string() << "\n";
+            }
+
+            std::cout << "\n" << std::string(50, '=') << "\n";
         }
-        case FillMethod::KEYBOARD: {
-            std::cout << "Введите " << size << " целых чисел:\n";
-            generator = std::make_unique<IStreamGenerator>();
-            break;
-        }
-        default: {
-            std::cout << "Неизвестный метод заполнения!\n";
-            return 1;
-        }
-        }
-
-        // Заполнение матрицы
-        matrix->fill(std::move(generator));
-
-        std::cout << "\n=== Исходный массив ===\n";
-        std::cout << matrix->to_string() << std::endl;
-
-        // Задание 1
-        std::cout << "\n=== Задание 1: Замена последнего отрицательного элемента ===\n";
-        auto task1_matrix = std::make_unique<Matrix>(*matrix);
-        auto task1 = std::make_unique<Task1Exercise>(
-            std::move(task1_matrix),
-            std::make_unique<ConstantGenerator>(0)
-        );
-        std::cout << "До: " << matrix->to_string() << std::endl;
-        task1->Task();
-        auto result1 = task1->get_result();
-        std::cout << "После: " << result1->to_string() << std::endl;
-
-        // Задание 2
-        std::cout << "\n=== Задание 2: Удаление элементов с повторяющимися цифрами ===\n";
-        auto task2_matrix = std::make_unique<Matrix>(*matrix);
-        auto task2 = std::make_unique<Task2Exercise>(
-            std::move(task2_matrix),
-            std::make_unique<ConstantGenerator>(0)
-        );
-        std::cout << "До: " << matrix->to_string() << std::endl;
-        task2->Task();
-        auto result2 = task2->get_result();
-        std::cout << "После: " << result2->to_string() << std::endl;
-
-        // Задание 3
-        std::cout << "\n=== Задание 3: Преобразование массива ===\n";
-        auto task3_matrix = std::make_unique<Matrix>(*matrix);
-        auto task3 = std::make_unique<Task3Exercise>(
-            std::move(task3_matrix),
-            std::make_unique<ConstantGenerator>(0)
-        );
-        std::cout << "До: " << matrix->to_string() << std::endl;
-        task3->Task();
-        auto result3 = task3->get_result();
-        std::cout << "После: " << result3->to_string() << std::endl;
-
-        // Демонстрация операторов
-        std::cout << "\n=== Демонстрация операторов ===\n";
-        auto matrix_ops = std::make_unique<Matrix>(*matrix);
-
-        if (matrix_ops->size() > 0) {
-            std::cout << "matrix[0] = " << (*matrix_ops)[0] << std::endl;
-        }
-
-        *matrix_ops << 999;
-        std::cout << "После matrix << 999: " << matrix_ops->to_string() << std::endl;
-
-        int extracted;
-        *matrix_ops >> extracted;
-        std::cout << "Извлеченный элемент: " << extracted << std::endl;
-        std::cout << "После извлечения: " << matrix_ops->to_string() << std::endl;
-
-        if (matrix_ops->size() > 0) {
-            const int* data_ptr = **matrix_ops;
-            std::cout << "Первый элемент через указатель: " << *data_ptr << std::endl;
-        }
-
-        std::cout << "\n=== Программа завершена успешно ===\n";
-
     }
-    catch (const std::exception& e) {
-        std::cerr << "Ошибка: " << e.what() << std::endl;
-        return 1;
-    }
-    catch (...) {
-        std::cerr << "Неизвестная ошибка!" << std::endl;
-        return 1;
-    }
+}
 
+int main()
+{
+    miit::algebra::run_application();
     return 0;
 }
