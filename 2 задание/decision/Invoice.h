@@ -2,24 +2,27 @@
 #include <string>
 #include <vector>
 #include "Product.h"
-#include "Client.h"
 
 using namespace std;
 
 namespace bakery {
+
+    // Предварительное объявление для избежания циклических зависимостей
+    class Client;
 
     class Invoice {
     private:
         string id;
         string date;
         Client* client;
-        vector<pair<Product*, int>> soldItems;
         double totalAmount;
+        vector<pair<Product*, int>> soldItems;
 
     public:
         Invoice(const string& id, const string& date, Client* client);
 
         void addItem(Product* product, int quantity, double price);
+
         const string& getId() const;
         const string& getDate() const;
         double getTotalAmount() const;
@@ -33,4 +36,4 @@ namespace bakery {
         bool isInPeriod(const string& startDate, const string& endDate) const;
     };
 
-} // namespace bakery
+}

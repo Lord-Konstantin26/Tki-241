@@ -1,4 +1,5 @@
 ﻿#include "Invoice.h"
+#include "Client.h"
 
 using namespace bakery;
 

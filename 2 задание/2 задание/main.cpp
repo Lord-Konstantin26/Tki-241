@@ -10,15 +10,45 @@
 using namespace std;
 using namespace bakery;
 
-enum class MenuOption {
+// Enum для главного меню
+enum class MainMenuOption {
     SHOW_ASSORTMENT = 1,
     SHOW_ORDERS,
     SHOW_SALES,
     SHOW_DISCOUNT_CLIENTS,
     SHOW_STATISTICS,
+    MANAGE_CLIENTS,
+    MANAGE_PRODUCTS,
     EXIT
 };
 
+// Enum для меню продаж
+enum class SalesMenuOption {
+    PERIOD_JANUARY = 1,
+    PERIOD_RECENT,
+    CUSTOM_PERIOD,
+    BACK
+};
+
+// Enum для меню управления клиентами
+enum class ClientMenuOption {
+    SHOW_ALL_CLIENTS = 1,
+    ADD_CLIENT,
+    MODIFY_DISCOUNT,
+    SHOW_CLIENT_HISTORY,
+    BACK
+};
+
+// Enum для меню управления продуктами
+enum class ProductMenuOption {
+    SHOW_ALL_PRODUCTS = 1,
+    ADD_PRODUCT,
+    UPDATE_STOCK,
+    SHOW_LOW_STOCK,
+    BACK
+};
+
+// Функции для работы с меню
 void showSalesForPeriod(const vector<Invoice>& invoices,
     const string& startDate,
     const string& endDate) {
@@ -72,7 +102,274 @@ void showClientsWithDiscount(const vector<shared_ptr<Client>>& clients) {
     cout << "════════════════════════════════════\n";
 }
 
-void displayMenu() {
+// Функция для отображения меню продаж
+void showSalesMenu(vector<Invoice>& invoices) {
+    bool inSalesMenu = true;
+
+    while (inSalesMenu) {
+        cout << "\n════════════════════════════════════\n";
+        cout << "МЕНЮ ПРОДАЖ:\n";
+        cout << "════════════════════════════════════\n";
+        cout << "1. Продажи за январь 2024 (01-31)\n";
+        cout << "2. Последние продажи (20-31 января)\n";
+        cout << "3. Задать произвольный период\n";
+        cout << "4. Вернуться в главное меню\n";
+        cout << "════════════════════════════════════\n";
+        cout << "Выберите пункт меню: ";
+
+        int choice;
+        cin >> choice;
+
+        SalesMenuOption option = static_cast<SalesMenuOption>(choice);
+
+        switch (option) {
+        case SalesMenuOption::PERIOD_JANUARY:
+            showSalesForPeriod(invoices, "2024-01-01", "2024-01-31");
+            break;
+
+        case SalesMenuOption::PERIOD_RECENT:
+            showSalesForPeriod(invoices, "2024-01-20", "2024-01-31");
+            break;
+
+        case SalesMenuOption::CUSTOM_PERIOD: {
+            string startDate, endDate;
+            cout << "Введите начальную дату (ГГГГ-ММ-ДД): ";
+            cin >> startDate;
+            cout << "Введите конечную дату (ГГГГ-ММ-ДД): ";
+            cin >> endDate;
+            showSalesForPeriod(invoices, startDate, endDate);
+            break;
+        }
+
+        case SalesMenuOption::BACK:
+            inSalesMenu = false;
+            break;
+
+        default:
+            cout << "Неверный выбор! Попробуйте снова.\n";
+        }
+
+        if (inSalesMenu && option != SalesMenuOption::BACK) {
+            cout << "\nНажмите Enter для продолжения...";
+            cin.ignore();
+            cin.get();
+        }
+    }
+}
+
+// Функция для отображения меню управления клиентами
+void showClientMenu(vector<shared_ptr<Client>>& clients, vector<Invoice>& invoices) {
+    bool inClientMenu = true;
+
+    while (inClientMenu) {
+        cout << "\n════════════════════════════════════\n";
+        cout << "УПРАВЛЕНИЕ КЛИЕНТАМИ:\n";
+        cout << "════════════════════════════════════\n";
+        cout << "1. Показать всех клиентов\n";
+        cout << "2. Добавить нового клиента\n";
+        cout << "3. Изменить скидку клиента\n";
+        cout << "4. Показать историю покупок клиента\n";
+        cout << "5. Вернуться в главное меню\n";
+        cout << "════════════════════════════════════\n";
+        cout << "Выберите пункт меню: ";
+
+        int choice;
+        cin >> choice;
+
+        ClientMenuOption option = static_cast<ClientMenuOption>(choice);
+
+        switch (option) {
+        case ClientMenuOption::SHOW_ALL_CLIENTS: {
+            cout << "\n════════════════════════════════════\n";
+            cout << "ВСЕ КЛИЕНТЫ:\n";
+            cout << "════════════════════════════════════\n";
+            for (const auto& client : clients) {
+                cout << "  • " << client->getBriefInfo() << endl;
+            }
+            cout << "════════════════════════════════════\n";
+            break;
+        }
+
+        case ClientMenuOption::ADD_CLIENT: {
+            string id, name;
+            double discount;
+            cout << "Введите ID клиента: ";
+            cin >> id;
+            cout << "Введите имя клиента: ";
+            cin.ignore();
+            getline(cin, name);
+            cout << "Введите скидку (%): ";
+            cin >> discount;
+            clients.push_back(make_shared<Client>(id, name, discount));
+            cout << "Клиент успешно добавлен!\n";
+            break;
+        }
+
+        case ClientMenuOption::MODIFY_DISCOUNT: {
+            string id;
+            double newDiscount;
+            cout << "Введите ID клиента: ";
+            cin >> id;
+            cout << "Введите новую скидку (%): ";
+            cin >> newDiscount;
+
+            bool found = false;
+            for (auto& client : clients) {
+                if (client->getId() == id) {
+                    client->setDiscount(newDiscount);
+                    cout << "Скидка обновлена!\n";
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                cout << "Клиент с ID " << id << " не найден.\n";
+            }
+            break;
+        }
+
+        case ClientMenuOption::SHOW_CLIENT_HISTORY: {
+            string clientId;
+            cout << "Введите ID клиента: ";
+            cin >> clientId;
+
+            bool found = false;
+            for (const auto& client : clients) {
+                if (client->getId() == clientId) {
+                    cout << client->getClientStats() << endl;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                cout << "Клиент с ID " << clientId << " не найден.\n";
+            }
+            break;
+        }
+
+        case ClientMenuOption::BACK:
+            inClientMenu = false;
+            break;
+
+        default:
+            cout << "Неверный выбор! Попробуйте снова.\n";
+        }
+
+        if (inClientMenu && option != ClientMenuOption::BACK) {
+            cout << "\nНажмите Enter для продолжения...";
+            cin.ignore();
+            cin.get();
+        }
+    }
+}
+
+// Функция для отображения меню управления продуктами
+void showProductMenu(Warehouse& warehouse) {
+    bool inProductMenu = true;
+
+    while (inProductMenu) {
+        cout << "\n════════════════════════════════════\n";
+        cout << "УПРАВЛЕНИЕ ПРОДУКТАМИ:\n";
+        cout << "════════════════════════════════════\n";
+        cout << "1. Показать все продукты\n";
+        cout << "2. Добавить новый продукт\n";
+        cout << "3. Обновить количество на складе\n";
+        cout << "4. Показать товары с низким запасом\n";
+        cout << "5. Вернуться в главное меню\n";
+        cout << "════════════════════════════════════\n";
+        cout << "Выберите пункт меню: ";
+
+        int choice;
+        cin >> choice;
+
+        ProductMenuOption option = static_cast<ProductMenuOption>(choice);
+
+        switch (option) {
+        case ProductMenuOption::SHOW_ALL_PRODUCTS:
+            cout << warehouse.getCurrentAssortment() << endl;
+            break;
+
+        case ProductMenuOption::ADD_PRODUCT: {
+            string id, name;
+            double price;
+            int quantity;
+            cout << "Введите ID продукта: ";
+            cin >> id;
+            cout << "Введите название продукта: ";
+            cin.ignore();
+            getline(cin, name);
+            cout << "Введите цену: ";
+            cin >> price;
+            cout << "Введите количество: ";
+            cin >> quantity;
+
+            auto newProduct = make_shared<Product>(id, name, price, quantity);
+            warehouse.addProduct(newProduct.get());
+            cout << "Продукт успешно добавлен!\n";
+            break;
+        }
+
+        case ProductMenuOption::UPDATE_STOCK: {
+            string id;
+            int quantity;
+            cout << "Введите ID продукта: ";
+            cin >> id;
+            cout << "Введите новое количество: ";
+            cin >> quantity;
+
+            Product* product = warehouse.findProductById(id);
+            if (product) {
+                product->setQuantity(quantity);
+                cout << "Количество обновлено!\n";
+            }
+            else {
+                cout << "Продукт с ID " << id << " не найден.\n";
+            }
+            break;
+        }
+
+        case ProductMenuOption::SHOW_LOW_STOCK: {
+            cout << "\n════════════════════════════════════\n";
+            cout << "ТОВАРЫ С НИЗКИМ ЗАПАСОМ (<10 шт.):\n";
+            cout << "════════════════════════════════════\n";
+
+            const auto& products = warehouse.getAllProducts();
+            bool hasLowStock = false;
+
+            for (const auto& product : products) {
+                if (product->getQuantity() < 10) {
+                    cout << "  • " << product->toString() << endl;
+                    hasLowStock = true;
+                }
+            }
+
+            if (!hasLowStock) {
+                cout << "Нет товаров с низким запасом.\n";
+            }
+            cout << "════════════════════════════════════\n";
+            break;
+        }
+
+        case ProductMenuOption::BACK:
+            inProductMenu = false;
+            break;
+
+        default:
+            cout << "Неверный выбор! Попробуйте снова.\n";
+        }
+
+        if (inProductMenu && option != ProductMenuOption::BACK) {
+            cout << "\nНажмите Enter для продолжения...";
+            cin.ignore();
+            cin.get();
+        }
+    }
+}
+
+// Обновленная функция отображения главного меню
+void displayMainMenu() {
     cout << "\n════════════════════════════════════\n";
     cout << "ГЛАВНОЕ МЕНЮ\n";
     cout << "════════════════════════════════════\n";
@@ -81,16 +378,20 @@ void displayMenu() {
     cout << "3. Показать продажи за период\n";
     cout << "4. Показать клиентов со скидкой\n";
     cout << "5. Показать общую статистику\n";
-    cout << "6. Выход\n";
+    cout << "6. Управление клиентами\n";
+    cout << "7. Управление продуктами\n";
+    cout << "8. Выход\n";
     cout << "════════════════════════════════════\n";
     cout << "Выберите пункт меню: ";
 }
 
+// ГЛАВНАЯ ФУНКЦИЯ ПРОГРАММЫ
 int main() {
     cout << "════════════════════════════════════════════════════════════\n";
     cout << "           СИСТЕМА СКЛАДСКОГО УЧЕТА\n";
     cout << "════════════════════════════════════════════════════════════\n\n";
 
+    // Инициализация данных
     Warehouse warehouse;
 
     auto bread = make_shared<Product>("PRD001", "Хлеб Бородинский", 50.0, 100);
@@ -115,9 +416,15 @@ int main() {
     minimarket->addOrder(milk.get(), 8);
 
     vector<shared_ptr<Client>> clients;
-    clients.push_back(make_shared<Client>("CL001", "ИП Петров", 5.0));    
-    clients.push_back(make_shared<Client>("CL002", "ООО 'Вектор'", 10.0)); 
-    clients.push_back(make_shared<Client>("CL003", "Кафе 'Бриз'", 0.0));   
+    clients.push_back(make_shared<Client>("CL001", "ИП Петров", 5.0));
+    clients.push_back(make_shared<Client>("CL002", "ООО 'Вектор'", 10.0));
+    clients.push_back(make_shared<Client>("CL003", "Кафе 'Бриз'", 0.0));
+
+    // Добавляем клиентов в магазины
+    for (auto& client : clients) {
+        supermarket->addClient(client.get());
+        minimarket->addClient(client.get());
+    }
 
     vector<Invoice> invoices;
 
@@ -126,35 +433,45 @@ int main() {
     inv1.addItem(milk.get(), 5, milk->getPrice());
     invoices.push_back(inv1);
 
+    // Добавляем накладные в клиентов и магазины
+    clients[0]->addInvoice(&invoices.back());
+    supermarket->addInvoice(&invoices.back());
+
     Invoice inv2("INV002", "2024-01-20", clients[1].get());
     inv2.addItem(cheese.get(), 8, cheese->getPrice());
     inv2.addItem(butter.get(), 3, butter->getPrice());
     invoices.push_back(inv2);
+
+    clients[1]->addInvoice(&invoices.back());
+    supermarket->addInvoice(&invoices.back());
 
     Invoice inv3("INV003", "2024-01-25", clients[2].get());
     inv3.addItem(bread.get(), 5, bread->getPrice());
     inv3.addItem(milk.get(), 4, milk->getPrice());
     invoices.push_back(inv3);
 
+    clients[2]->addInvoice(&invoices.back());
+    minimarket->addInvoice(&invoices.back());
+
     bool running = true;
 
     while (running) {
-        displayMenu();
+        displayMainMenu();
 
         int choice;
         cin >> choice;
 
-        MenuOption option = static_cast<MenuOption>(choice);
+        MainMenuOption option = static_cast<MainMenuOption>(choice);
 
         switch (option) {
-        case MenuOption::SHOW_ASSORTMENT:
+        case MainMenuOption::SHOW_ASSORTMENT:
             cout << "\n════════════════════════════════════\n";
             cout << "АССОРТИМЕНТ НА СКЛАДЕ:\n";
             cout << "════════════════════════════════════\n";
             cout << warehouse.getCurrentAssortment() << endl;
             break;
 
-        case MenuOption::SHOW_ORDERS:
+        case MainMenuOption::SHOW_ORDERS:
             cout << "\n════════════════════════════════════\n";
             cout << "ЗАКАЗЫ МАГАЗИНОВ:\n";
             cout << "════════════════════════════════════\n";
@@ -162,34 +479,15 @@ int main() {
             cout << minimarket->getOrderedProducts() << endl;
             break;
 
-        case MenuOption::SHOW_SALES:
-            cout << "\n════════════════════════════════════\n";
-            cout << "ВЫБОР ПЕРИОДА ПРОДАЖ:\n";
-            cout << "════════════════════════════════════\n";
-
-            int periodChoice;
-            cout << "1. Январь 2024 (01-31)\n";
-            cout << "2. Последние продажи\n";
-            cout << "Выберите период: ";
-            cin >> periodChoice;
-
-            switch (periodChoice) {
-            case 1:
-                showSalesForPeriod(invoices, "2024-01-01", "2024-01-31");
-                break;
-            case 2:
-                showSalesForPeriod(invoices, "2024-01-20", "2024-01-31");
-                break;
-            default:
-                cout << "Неверный выбор!\n";
-            }
+        case MainMenuOption::SHOW_SALES:
+            showSalesMenu(invoices);
             break;
 
-        case MenuOption::SHOW_DISCOUNT_CLIENTS:
+        case MainMenuOption::SHOW_DISCOUNT_CLIENTS:
             showClientsWithDiscount(clients);
             break;
 
-        case MenuOption::SHOW_STATISTICS:
+        case MainMenuOption::SHOW_STATISTICS:
             cout << "\n════════════════════════════════════\n";
             cout << "ОБЩАЯ СТАТИСТИКА СИСТЕМЫ:\n";
             cout << "════════════════════════════════════\n";
@@ -204,10 +502,41 @@ int main() {
                 totalRevenue += invoice.getTotalAmount();
             }
             cout << "• Общая выручка: " << totalRevenue << " руб.\n";
+
+            // Статистика магазинов
+            cout << "════════════════════════════════════\n";
+            cout << "СТАТИСТИКА МАГАЗИНОВ:\n";
+            cout << "════════════════════════════════════\n";
+            cout << "1. " << supermarket->getBriefInfo() << "\n";
+            cout << "   Продаж: " << supermarket->getInvoiceCount() << ", Клиентов: "
+                << supermarket->getClientCount() << ", Сумма: "
+                << supermarket->getTotalSales() << " руб.\n";
+            cout << "2. " << minimarket->getBriefInfo() << "\n";
+            cout << "   Продаж: " << minimarket->getInvoiceCount() << ", Клиентов: "
+                << minimarket->getClientCount() << ", Сумма: "
+                << minimarket->getTotalSales() << " руб.\n";
+            cout << "════════════════════════════════════\n";
+
+            // Статистика клиентов
+            cout << "СТАТИСТИКА КЛИЕНТОВ:\n";
+            cout << "════════════════════════════════════\n";
+            for (const auto& client : clients) {
+                cout << "• " << client->getBriefInfo() << "\n";
+                cout << "  Покупок: " << client->getInvoiceCount()
+                    << ", Сумма: " << client->getTotalPurchases() << " руб.\n";
+            }
             cout << "════════════════════════════════════\n";
             break;
 
-        case MenuOption::EXIT:
+        case MainMenuOption::MANAGE_CLIENTS:
+            showClientMenu(clients, invoices);
+            break;
+
+        case MainMenuOption::MANAGE_PRODUCTS:
+            showProductMenu(warehouse);
+            break;
+
+        case MainMenuOption::EXIT:
             cout << "\n════════════════════════════════════\n";
             cout << "Спасибо за использование системы!\n";
             cout << "════════════════════════════════════\n";
@@ -218,7 +547,9 @@ int main() {
             cout << "\nНеверный выбор. Попробуйте снова.\n";
         }
 
-        if (running) {
+        if (running && option != MainMenuOption::MANAGE_CLIENTS &&
+            option != MainMenuOption::MANAGE_PRODUCTS &&
+            option != MainMenuOption::SHOW_SALES) {
             cout << "\nНажмите Enter для продолжения...";
             cin.ignore();
             cin.get();
